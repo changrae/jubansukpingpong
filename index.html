@@ -1050,7 +1050,7 @@
 
     <form class="reg" id="regForm" novalidate>
       <h3>참가 신청서</h3>
-      <p class="sub">이름·성별·희망 종목을 입력한 후 제출해 주세요. 접수 마감: 7월 11일(토).</p>
+      <p class="sub">모든 항목 입력 후 제출해 주세요. 접수 마감: 7월 11일(토). 신청 즉시 관리 페이지에서 확인 가능합니다.</p>
 
       <div class="row2">
         <div class="field">
@@ -1058,12 +1058,37 @@
           <input type="text" name="name" required placeholder="홍길동" autocomplete="name">
         </div>
         <div class="field">
+          <label>소속 <span class="req">*</span></label>
+          <input type="text" name="dept" required placeholder="예: 3남선교회">
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
           <label>성별 <span class="req">*</span></label>
           <select name="gender" required>
             <option value="">선택</option>
             <option value="M">남성</option>
             <option value="F">여성</option>
           </select>
+        </div>
+        <div class="field">
+          <label>실력 등급 <span class="req">*</span></label>
+          <select name="level" required>
+            <option value="">선택</option>
+            <option value="입문">입문</option>
+            <option value="초급">초급</option>
+            <option value="중급">중급</option>
+            <option value="상급">상급</option>
+            <option value="동호회">동호회</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label>연락처 (이메일) <span class="req">*</span></label>
+          <input type="email" name="email" required placeholder="이메일 주소">
         </div>
       </div>
 
@@ -1112,7 +1137,7 @@
       <button class="submit" type="submit" id="submitBtn" style="margin-top:24px">
         참가 신청 제출하기
       </button>
-      <p class="terms">제출 시 <a href="#">개인정보 수집·이용</a>에 동의한 것으로 봅니다. 접수 마감: 7월 11일(토).</p>
+      <p class="terms">제출 시 <a href="#">개인정보 수집·이용</a>에 동의한 것으로 봅니다. 신청 완료 후 <a href="app.html">대회 관리 페이지</a>에서 본인 정보를 확인할 수 있습니다.</p>
 
       <div class="form-msg" id="formMsg" role="status" aria-live="polite"></div>
     </form>
@@ -1276,18 +1301,65 @@
       btn.disabled = true;
       btn.textContent = '제출 중...';
       setTimeout(() => {
-        const data = new FormData(form);
-        const ev = data.get('event');
-        const name = data.get('name');
+        const fd = new FormData(form);
+        const name = fd.get('name');
+        const ev = fd.get('event');
+        const email = fd.get('email');
+        const gender = fd.get('gender');
+        const dept = fd.get('dept');
+        const level = fd.get('level');
+        const partner = fd.get('partnerName') || '';
+
+        const STORAGE_KEY = 'tt_tournament_manager_v1';
+        let stored;
+        try {
+          stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        } catch (_) {}
+        if (!stored) {
+          const seedId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+          const adminId = Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+          const tId = Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+          const brackets = {};
+          ['남자단식','여자단식','남자복식','여자복식','혼성복식'].forEach(ev => {
+            brackets[`${tId}_${ev}`] = { size: 8, matches: [], roundStarts: [] };
+          });
+          stored = {
+            users: [{
+              id: adminId, email: 'admin@jubansek.kr', password: 'admin123',
+              name: '운영관리자', dept: '운영팀', gender: 'M', level: '동호회',
+              role: 'admin', phone: '', createdAt: Date.now()
+            }],
+            session: null,
+            tournaments: [{
+              id: tId, name: '일산주반석 탁구대회 2026', date: '2026-08-02',
+              location: '일산주반석교회 특설 대회장', status: 'open',
+              description: '성전 헌당 7주년 기념 전교인 탁구 단합대회',
+              participantIds: [], createdAt: Date.now()
+            }],
+            brackets, announcements: [], notifications: []
+          };
+        }
+        const t = stored.tournaments[0];
+        const playerId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        const user = {
+          id: playerId, email, password: 'player123', name,
+          dept, gender, level, role: 'player', phone: partner,
+          createdAt: Date.now(), event: ev
+        };
+        stored.users.push(user);
+        if (!t.participantIds.includes(playerId)) t.participantIds.push(playerId);
+        if (partner) user.partnerName = partner;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+
         msg.style.cssText = '';
         msg.className = 'form-msg show';
-        msg.innerHTML = '<strong>접수 완료!</strong> ' + name + '님, ' + ev + '로 신청되었습니다. 예선 일정은 7/12(일)부터 시작됩니다.';
+        msg.innerHTML = '<strong>접수 완료!</strong> ' + name + '님의 신청이 관리 페이지에 등록되었습니다.';
         btn.disabled = false;
         btn.textContent = '참가 신청 완료 ✓';
         btn.style.background = '#10b981';
         modal.classList.add('show');
         document.getElementById('modalTitle').textContent = name + '님, 접수 완료!';
-        document.getElementById('modalBody').innerHTML = '<strong>' + ev + '</strong> 정상 접수되었습니다.<br>예선(7/12~25)은 상대와 일정 협의 후 수시로 진행해 주세요.';
+        document.getElementById('modalBody').innerHTML = '<strong>' + ev + '</strong> 정상 접수되었습니다.<br>예선(7/12~25)은 상대와 일정 협의 후 수시로 진행해 주세요.<br><br><a href="app.html" style="color:var(--blue);text-decoration:underline">→ 대회 관리 페이지에서 확인</a>';
       }, 700);
     });
   })();
