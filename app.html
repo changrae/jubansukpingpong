@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="주반석 탁구대회 — 선수 등록, 대진표, 경기 운영, 순위, 공지를 한곳에서 관리">
+<meta name="theme-color" content="#0b0f1a">
+<title>탁구대회 관리 — 주반석 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<!-- ===== AUTH ===== -->
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="paddle">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14.5 3.5l6 6"/><circle cx="8.5" cy="15.5" r="5.5"/><path d="M14.5 9.5l-6 6"/>
+        </svg>
+      </div>
+      <div>
+        <h1>탁구대회 관리</h1>
+        <small>TOURNAMENT MANAGER</small>
+      </div>
+    </div>
+
+    <div class="auth-tabs">
+      <button type="button" data-mode="login" class="active">로그인</button>
+      <button type="button" data-mode="register">회원가입</button>
+    </div>
+
+    <div id="authAlert" class="alert alert-error hidden"></div>
+
+    <form id="authForm">
+      <h2 id="authFormTitle" style="margin:0 0 20px;font-size:18px;font-weight:700">로그인</h2>
+      <div id="authFields"></div>
+    </form>
+
+    <div class="auth-hint">
+      <strong>데모 계정</strong><br>
+      관리자: <code>admin@jubansek.kr</code> / <code>admin123</code><br>
+      선수: <code>20260001@jubansek.kr</code> / <code>player123</code>
+    </div>
+
+    <a href="index.html" class="auth-link" style="margin-top:20px">← 대회 안내 페이지로</a>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="appShell" class="app-shell hidden">
+  <header class="app-header">
+    <h2 id="headerTitle">대시보드</h2>
+    <div class="header-actions">
+      <span id="adminBadge" class="admin-badge hidden">ADMIN</span>
+      <button type="button" class="notif-btn" id="notifBtn" aria-label="알림">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span id="notifBadge" class="notif-badge hidden">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <!-- Dashboard -->
+    <section id="panel-dashboard" class="panel active">
+      <div class="stats-row" id="dashStats"></div>
+      <p class="section-title">대회 선택</p>
+      <div class="tournament-select" id="dashTournamentPills"></div>
+      <div id="dashContent"></div>
+    </section>
+
+    <!-- Brackets -->
+    <section id="panel-brackets" class="panel">
+      <p class="section-title">대회 · 종목</p>
+      <div class="tournament-select" id="bracketTournamentPills"></div>
+      <div id="bracketEventPills"></div>
+      <div id="bracketContent"></div>
+    </section>
+
+    <!-- Matches -->
+    <section id="panel-matches" class="panel">
+      <p class="section-title">대회 · 종목</p>
+      <div class="tournament-select" id="matchTournamentPills"></div>
+      <div id="matchEventPills"></div>
+      <div id="matchFiltersWrap"></div>
+      <div id="matchList"></div>
+    </section>
+
+    <!-- Leaderboard -->
+    <section id="panel-leaderboard" class="panel">
+      <p class="section-title">대회 · 종목</p>
+      <div class="tournament-select" id="lbTournamentPills"></div>
+      <div id="lbEventPills"></div>
+      <div id="leaderboardContent"></div>
+    </section>
+
+    <!-- Announcements -->
+    <section id="panel-announcements" class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <p class="section-title" style="margin:0">공지사항</p>
+        <div id="announceActions"></div>
+      </div>
+      <div id="announceList"></div>
+    </section>
+
+    <!-- Players (admin only) -->
+    <section id="panel-players" class="panel">
+      <p class="section-title">전체 선수</p>
+      <div id="playerSearchWrap"></div>
+      <div id="playerList"></div>
+    </section>
+
+    <!-- Profile -->
+    <section id="panel-profile" class="panel">
+      <div id="profileContent"></div>
+    </section>
+  </main>
+
+  <nav class="tab-bar" aria-label="메인 메뉴">
+    <button type="button" class="tab-btn active" data-tab="dashboard" aria-label="대시보드">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      대시보드
+    </button>
+    <button type="button" class="tab-btn" data-tab="brackets" aria-label="대진표">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+      대진표
+    </button>
+    <button type="button" class="tab-btn" data-tab="matches" aria-label="경기">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      경기
+    </button>
+    <button type="button" class="tab-btn" data-tab="leaderboard" aria-label="순위">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10l1 7H6z"/><path d="M5 11v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"/></svg>
+      순위
+    </button>
+    <button type="button" class="tab-btn" data-tab="announcements" aria-label="공지">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      공지
+    </button>
+    <button type="button" class="tab-btn" data-tab="players" aria-label="선수단">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      선수단
+    </button>
+    <button type="button" class="tab-btn" data-tab="profile" aria-label="프로필">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      프로필
+    </button>
+  </nav>
+</div>
+
+<!-- Modal -->
+<div id="modalOverlay" class="modal-overlay">
+  <div class="modal-sheet">
+    <h3 id="modalTitle"></h3>
+    <form id="modalForm">
+      <div id="modalBody"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="modalClose">닫기</button>
+        <button type="submit" class="btn btn-primary" id="modalSubmit">저장</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
