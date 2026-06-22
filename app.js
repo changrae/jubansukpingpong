@@ -1,11 +1,14 @@
 (function () {
   'use strict';
 
-  const API_BASE = '/api';
+  const API_PORT = 3000;
+  const API_BASE = window.location.protocol === 'file:'
+    ? `http://localhost:${API_PORT}/api`
+    : `${window.location.protocol}//${window.location.hostname}:${API_PORT}/api`;
   const EVENTS = ['남자단식', '여자단식', '남자복식', '여자복식', '혼성복식'];
   const LEVELS = ['입문', '초급', '중급', '상급', '동호회'];
 
-  let TOKEN = localStorage.getItem('tt_token') || null;
+  let TOKEN = (() => { try { return localStorage.getItem('tt_token'); } catch { return null; } })() || null;
   let currentUser = null;
   let currentTab = 'dashboard';
   let selectedTournament = null;
@@ -65,11 +68,11 @@
     try {
       const data = await apiPost('/auth/login', { email, password });
       TOKEN = data.token;
-      localStorage.setItem('tt_token', TOKEN);
       currentUser = data.user;
-      return true;
+      try { localStorage.setItem('tt_token', TOKEN); } catch {}
+      return { ok: true };
     } catch (e) {
-      return false;
+      return { ok: false, msg: e.message };
     }
   }
 
@@ -85,8 +88,8 @@
         phone: formData.phone?.value?.trim() || '',
       });
       TOKEN = data.token;
-      localStorage.setItem('tt_token', TOKEN);
       currentUser = data.user;
+      try { localStorage.setItem('tt_token', TOKEN); } catch {}
       return { ok: true };
     } catch (e) {
       return { ok: false, msg: e.message };
@@ -96,7 +99,7 @@
   function logout() {
     TOKEN = null;
     currentUser = null;
-    localStorage.removeItem('tt_token');
+    try { localStorage.removeItem('tt_token'); } catch {}
     showAuth();
     toast('로그아웃되었습니다.');
   }
@@ -868,11 +871,12 @@
 
       const fd = new FormData(e.target);
       if (state.authMode === 'login') {
-        if (await login(fd.get('email'), fd.get('password'))) {
+        const result = await login(fd.get('email'), fd.get('password'));
+        if (result.ok) {
           showApp();
           toast(`환영합니다, ${currentUser.name}님!`);
         } else {
-          alertEl.textContent = '이메일 또는 비밀번호가 올바르지 않습니다.';
+          alertEl.textContent = result.msg;
           alertEl.className = 'alert alert-error';
           alertEl.classList.remove('hidden');
         }
