@@ -131,10 +131,8 @@
 
     if (isForgot) {
       $('#authFields').innerHTML = `
-        <div class="alert alert-success">데모 환경입니다. 관리자에게 문의하거나 아래 데모 계정을 이용해 주세요.</div>
-        <div class="field"><label>등록 이메일</label><input type="email" name="email" placeholder="20260001@jubansek.kr"></div>
-        <button type="submit" class="btn btn-primary">재설정 링크 발송 (데모)</button>
-        <button type="button" class="auth-link" id="backToLogin">로그인으로 돌아가기</button>
+        <div class="alert alert-info">관리자에게 문의하여 비밀번호를 재설정해 주세요.</div>
+        <button type="button" class="btn btn-primary" id="backToLogin">로그인으로 돌아가기</button>
       `;
       $('#backToLogin')?.addEventListener('click', () => { state.authMode = 'login'; renderAuthForm(); });
       return;
@@ -862,8 +860,8 @@
       alertEl.classList.add('hidden');
 
       if (state.authMode === 'forgot') {
-        alertEl.textContent = '데모: 재설정 링크가 발송되었습니다. (실제 발송 없음)';
-        alertEl.className = 'alert alert-success';
+        alertEl.textContent = '관리자에게 문의해 주세요.';
+        alertEl.className = 'alert alert-info';
         alertEl.classList.remove('hidden');
         return;
       }
