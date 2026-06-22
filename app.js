@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const API_BASE = 'http://localhost:3000/api';
+  const API_BASE = '/api';
   const EVENTS = ['남자단식', '여자단식', '남자복식', '여자복식', '혼성복식'];
   const LEVELS = ['입문', '초급', '중급', '상급', '동호회'];
 
