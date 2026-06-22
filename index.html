@@ -1325,7 +1325,7 @@
           });
           stored = {
             users: [{
-              id: adminId, email: 'admin@jubanserk.kr', password: 'qawsedrf!1234',
+              id: adminId, email: 'admin@jubanserk.kr', password: 'admin1234',
               name: '운영관리자', dept: '운영팀', gender: 'M', level: '동호회',
               role: 'admin', phone: '', createdAt: Date.now()
             }],
@@ -1342,7 +1342,7 @@
         const t = stored.tournaments[0];
         const playerId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
         const user = {
-          id: playerId, email, password: 'player123', name,
+          id: playerId, email, password: 'player1234', name,
           dept, gender, level, role: 'player', phone: partner,
           createdAt: Date.now(), event: ev
         };

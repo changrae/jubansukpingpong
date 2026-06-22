@@ -3,11 +3,11 @@ const { v4: uuid } = require('uuid');
 const bcrypt = require('bcryptjs');
 
 const DB_CONFIG = {
-  host: process.env.DB_HOST || 'jubanserk.precon.im',
+  host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT || '3306', 10),
-  user: process.env.DB_USER || 'precon',
-  password: process.env.DB_PASSWORD || 'qawsed!2345',
-  database: process.env.DB_NAME || 'vue_blog',
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
 };
@@ -129,12 +129,12 @@ async function seedIfEmpty() {
   const p4 = uuid();
   const tId = uuid();
 
-  const adminPw = bcrypt.hashSync('qawsedrf!1234', 10);
-  const playerPw = bcrypt.hashSync('player123', 10);
+  const adminPw = bcrypt.hashSync(process.env.ADMIN_PASSWORD, 10);
+  const playerPw = bcrypt.hashSync(process.env.PLAYER_PASSWORD, 10);
 
   await pool.execute(
     'INSERT INTO users (id, email, password, name, dept, gender, level, role, phone, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    [adminId, 'admin@jubanserk.kr', adminPw, '운영관리자', '단합위원회', 'M', '동호회', 'admin', '0420', now]
+    [adminId, process.env.ADMIN_EMAIL, adminPw, process.env.ADMIN_NAME, process.env.ADMIN_DEPT, 'M', '동호회', 'admin', process.env.ADMIN_PHONE, now]
   );
   await pool.execute(
     'INSERT INTO users (id, email, password, name, dept, gender, level, role, phone, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -202,15 +202,14 @@ async function seedIfEmpty() {
 }
 
 async function ensureAdmin() {
-  const adminEmail = 'admin@jubanserk.kr';
-  const adminPw = bcrypt.hashSync('qawsedrf!1234', 10);
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPw = bcrypt.hashSync(process.env.ADMIN_PASSWORD, 10);
   const [rows] = await pool.execute('SELECT id FROM users WHERE email = ?', [adminEmail]);
   if (rows.length === 0) {
-    await pool.execute('DELETE FROM users WHERE email = ?', ['admin@jubansek.kr']);
     const id = uuid();
     await pool.execute(
       'INSERT INTO users (id, email, password, name, dept, gender, level, role, phone, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [id, adminEmail, adminPw, '운영관리자', '단합위원회', 'M', '동호회', 'admin', '0420', Date.now()]
+      [id, adminEmail, adminPw, process.env.ADMIN_NAME, process.env.ADMIN_DEPT, 'M', '동호회', 'admin', process.env.ADMIN_PHONE, Date.now()]
     );
   } else {
     await pool.execute('UPDATE users SET password = ? WHERE email = ?', [adminPw, adminEmail]);

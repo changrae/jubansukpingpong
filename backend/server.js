@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
@@ -7,8 +8,8 @@ const { v4: uuid } = require('uuid');
 const { getDb } = require('./db');
 
 const app = express();
-const PORT = process.env.PORT || 3306;
-const JWT_SECRET = 'jubansek_table_tennis_2026_secret';
+const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || (() => { throw new Error('JWT_SECRET 환경 변수가 설정되지 않았습니다.'); })();
 
 app.use(cors());
 app.use(express.json());

@@ -149,8 +149,8 @@
           <div class="field"><label>실력 등급</label><select name="level" required>${LEVELS.map(l => `<option value="${l}">${l}</option>`).join('')}</select></div>
         </div>
       ` : ''}
-      <div class="field"><label>이메일</label><input type="email" name="email" required placeholder="20260001@jubansek.kr" autocomplete="email"></div>
-      <div class="field"><label>비밀번호</label><input type="password" name="password" required placeholder="••••••••" autocomplete="${isLogin ? 'current-password' : 'new-password'}"></div>
+      <div class="field"><label>이메일</label><input type="email" name="email" required autocomplete="email"></div>
+      <div class="field"><label>비밀번호</label><input type="password" name="password" required autocomplete="${isLogin ? 'current-password' : 'new-password'}"></div>
       <button type="submit" class="btn btn-primary">${isLogin ? '로그인' : '가입하기'}</button>
       ${isLogin ? '<button type="button" class="auth-link" id="forgotBtn">비밀번호를 잊으셨나요?</button>' : ''}
     `;
